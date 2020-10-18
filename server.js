@@ -1,16 +1,90 @@
 import express from "express";
 import axios from "axios";
 import fs from "fs";
+import cron from "cron";
+import cheerio from "cheerio";
 
+const { CronJob } = cron;
 const app = express();
 app.use(express.json());
 
-const sendMessage = async (message) => {
-	await axios.post(`https://api.groupme.com/v3/bots/post`, {
-		bot_id: process.env.BOT_ID,
-		text: message,
-	});
+const sendMessage = async ({ message, attachments }) => {
+	try {
+		await axios.post(`https://api.groupme.com/v3/bots/post`, {
+			bot_id: process.env.DEV_BOT_ID,
+			text: message,
+			attachments,
+		});
+	} catch (error) {
+		console.error(error);
+	}
 };
+
+const everySecond = "* * * * * *";
+const everyMinute = "0 * * * * *";
+const everyHour = "* 0 * * * *";
+const everyDay = "* * 7 * * *";
+let oldDukeStatus = "YES";
+
+const DukeWinCheck = new CronJob(
+	everyHour,
+	async () => {
+		const didDukeWin = await axios.get("http://diddukewin.com");
+		const $ = cheerio.load(didDukeWin.data);
+		const winStatus = $("#middle").text();
+		const gameLink = $("a").attr("href");
+
+		if (oldDukeStatus === "YES" && winStatus.trim().split(" ")[0] === "NO") {
+			console.log("Duke Lost. Sending Message");
+			await sendMessage({ message: `Duke lost lol\n${gameLink}` });
+		}
+		oldDukeStatus = winStatus.trim().split(" ")[0];
+	},
+	null,
+	true
+);
+const BirthdayCheck = new CronJob(
+	everyDay,
+	async () => {
+		const dateString = `${new Date().getMonth() + 1}/${new Date().getDate()}`;
+		const birthdays = JSON.parse(fs.readFileSync(`birthdays.json`));
+		const stored_members = JSON.parse(fs.readFileSync(`members.json`)).members;
+		const birthdaysToday = birthdays[dateString];
+		for (const bday of birthdaysToday) {
+			const { user_id, nickname, muted } = stored_members.find(
+				({ name }) => name === bday
+			);
+			if (!muted) {
+				const googleImageSearchRequest = await axios.get(
+					`https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_KEY}&q=Happy Birthday&rating=g`
+				);
+				const imageSet = googleImageSearchRequest.data.data;
+				const image = imageSet[Math.floor(Math.random() * imageSet.length)];
+				const message = `Happy Birthday ${nickname}!!`;
+				const loci = [[15, nickname.length + 1]];
+				const user_ids = [user_id];
+				const attachments = [
+					{
+						type: "mentions",
+						user_ids,
+						loci,
+					},
+					{
+						type: "image",
+						url: `https://media0.giphy.com/media/${image.id}/giphy.gif`,
+					},
+				];
+				await sendMessage({ message, attachments });
+				console.log(`Happy Birthday to ${nickname}`);
+			}
+		}
+	},
+	null,
+	true
+);
+
+BirthdayCheck.start();
+DukeWinCheck.start();
 
 app.post("/", async (req, res) => {
 	const message = req.body;
@@ -78,9 +152,9 @@ app.post("/", async (req, res) => {
 			`scores.json`,
 			JSON.stringify({ scores: currentStats }, null, 2)
 		);
-		await sendMessage(
-			`${kickee} has been kicked out ${timesKicked} time(s) by ${kicker}\nThey've been kicked ${totalKicks} time(s) total`
-		);
+		await sendMessage({
+			message: `${kickee} has been kicked out ${timesKicked} time(s) by ${kicker}\nThey've been kicked ${totalKicks} time(s) total`,
+		});
 	}
 });
 
