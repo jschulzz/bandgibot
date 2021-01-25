@@ -3,6 +3,8 @@ import axios from "axios";
 import fs from "fs";
 import cron from "cron";
 import cheerio from "cheerio";
+import nedb from "nedb-promises";
+import path from "path";
 
 const { CronJob } = cron;
 const app = express();
@@ -24,7 +26,19 @@ const everySecond = "* * * * * *";
 const everyMinute = "0 * * * * *";
 const everyHour = "* 0 * * * *";
 const everyDay = "* * 7 * * *";
-let oldDukeStatus = "YES";
+
+const memberDB = nedb.create({
+	filename: path.join("members.db"),
+	autoload: true,
+});
+const kickDB = nedb.create({
+	filename: path.join("kicks.db"),
+	autoload: true,
+});
+const dukeDB = nedb.create({
+	filename: path.join("duke.db"),
+	autoload: true,
+});
 
 const DukeWinCheck = new CronJob(
 	everyHour,
@@ -33,12 +47,24 @@ const DukeWinCheck = new CronJob(
 		const $ = cheerio.load(didDukeWin.data);
 		const winStatus = $("#middle").text();
 		const gameLink = $("a").attr("href");
-
-		if (oldDukeStatus === "YES" && winStatus.trim().split(" ")[0] === "NO") {
-			console.log("Duke Lost. Sending Message");
-			await sendMessage({ message: `Duke lost lol\n${gameLink}` });
+		const winText = winStatus.trim().split(" ")[0];
+		let [oldDukeStatus] = await dukeDB.find({});
+		if (!oldDukeStatus) {
+			oldDukeStatus = { winText, gameLink };
 		}
-		oldDukeStatus = winStatus.trim().split(" ")[0];
+		if (oldDukeStatus.gameLink !== gameLink) {
+			// new game
+			console.log(`Duke Update:\n won: ${winText}`);
+			if (winText == "NO") {
+				console.log("Duke Lost. Sending Message");
+				await sendMessage({ message: `Duke lost lol\n${gameLink}` });
+			}
+			await dukeDB.update(
+				{},
+				{ winText, gameLink },
+				{ upsert: true, multi: false }
+			);
+		}
 	},
 	null,
 	true
@@ -48,12 +74,12 @@ const BirthdayCheck = new CronJob(
 	async () => {
 		const dateString = `${new Date().getMonth() + 1}/${new Date().getDate()}`;
 		const birthdays = JSON.parse(fs.readFileSync(`birthdays.json`));
-		const stored_members = JSON.parse(fs.readFileSync(`members.json`)).members;
-		const birthdaysToday = birthdays[dateString];
+		const birthdaysToday = birthdays[dateString] || [];
+		// console.log(birthdaysToday, dateString)
 		for (const bday of birthdaysToday) {
-			const { user_id, nickname, muted } = stored_members.find(
-				({ name }) => name === bday
-			);
+			const { user_id, nickname, muted } = await memberDB.findOne({
+				name: bday,
+			});
 			if (!muted) {
 				const googleImageSearchRequest = await axios.get(
 					`https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_KEY}&q=Happy Birthday&rating=g`
@@ -89,71 +115,46 @@ DukeWinCheck.start();
 app.post("/", async (req, res) => {
 	const message = req.body;
 	const { text, system, group_id } = message;
+	console.log(text);
 	const { data } = await axios.get(
 		`https://api.groupme.com/v3/groups/${group_id}?token=${process.env.API_TOKEN}`
 	);
 	const current_members = data.response.members;
-	const stored_members = JSON.parse(fs.readFileSync(`members.json`)).members;
-	let all_members = [];
-	[...current_members, ...stored_members].forEach((newMember) => {
-		if (
-			!all_members.some(
-				(member) => member.user_id && member.user_id === newMember.user_id
-			)
-		) {
-			all_members.push(newMember);
-		}
+	current_members.forEach(async (member) => {
+		await memberDB.update({ user_id: member.user_id }, member, {
+			upsert: true,
+		});
 	});
-	fs.writeFileSync(
-		`members.json`,
-		JSON.stringify(
-			{
-				members: Array.from(all_members),
-			},
-			null,
-			2
-		)
-	);
 	if (system && text.includes("removed") && text.includes("from the group")) {
 		const kicker = text.split("removed")[0].trim();
 		const kickee = text.split("removed")[1].split("from the group")[0].trim();
-
-		const { user_id: kicker_id, name: kicker_name } = all_members.find(
-			(member) => {
-				console.log(member);
-				return member.nickname === kicker;
-			}
-		);
-		const { user_id: kickee_id, name: kickee_name } = all_members.find(
-			(member) => member.nickname === kickee
-		);
+		const { user_id: kicker_id, name: kicker_name } = await memberDB.findOne({
+			nickname: kicker,
+		});
+		const { user_id: kickee_id, name: kickee_name } = await memberDB.findOne({
+			nickname: kickee,
+		});
 		console.log(kicker_name, "kicked", kickee_name);
-		let currentStats = JSON.parse(fs.readFileSync(`scores.json`)).scores;
-		if (!currentStats[kickee_id]) {
-			currentStats[kickee_id] = {
+
+		let currentStats = await kickDB.findOne({ user_kicked: kickee_id });
+		if (!currentStats) {
+			await kickDB.insert({
+				user_kicked: kickee_id,
+				kicked_by: [],
 				name: kickee_name,
-			};
+			});
 		}
-		if (!currentStats[kickee_id][kicker_id]) {
-			currentStats[kickee_id][kicker_id] = 1;
-		} else {
-			currentStats[kickee_id][kicker_id]++;
-		}
-		const timesKicked = currentStats[kickee_id][kicker_id];
-		const totalKicks = Object.values(currentStats[kickee_id]).reduce(
-			(sum, next) => {
-				if (typeof next === "number") {
-					return sum + next;
-				}
-				return sum;
-			}
+		await kickDB.update(
+			{ user_kicked: kickee_id },
+			{ $push: { kicked_by: { user_id: kicker_id } } }
 		);
-		fs.writeFileSync(
-			`scores.json`,
-			JSON.stringify({ scores: currentStats }, null, 2)
-		);
+
+		const { kicked_by } = await kickDB.findOne({ user_kicked: kickee_id });
+		const totalKicks = kicked_by.length;
+		const kicksByKicker = kicked_by.filter((kick) => kick.user_id === kicker_id)
+			.length;
 		await sendMessage({
-			message: `${kickee} has been kicked out ${timesKicked} time(s) by ${kicker}\nThey've been kicked ${totalKicks} time(s) total`,
+			message: `${kickee} has been kicked out ${kicksByKicker} time(s) by ${kicker}\nThey've been kicked ${totalKicks} time(s) total`,
 		});
 	}
 });
