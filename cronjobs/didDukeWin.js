@@ -1,5 +1,7 @@
 import axios from "axios";
 import cheerio from "cheerio";
+import { sendMessage } from "../utils.js";
+
 
 export const didDukeWin = (dukeDB) => {
 	return async () => {
@@ -8,7 +10,7 @@ export const didDukeWin = (dukeDB) => {
 		const winStatus = $("#middle").text();
 		const gameLink = $("a").attr("href");
 		const winText = winStatus.trim().split(" ")[0];
-		let [oldDukeStatus] = await dukeDB.find({});
+        let [oldDukeStatus] = await dukeDB.find({});
 		if (!oldDukeStatus) {
 			oldDukeStatus = { winText, gameLink };
 			if (winText == "NO") {

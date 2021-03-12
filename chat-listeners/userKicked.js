@@ -1,4 +1,4 @@
-import { sendMessage } from "../utils";
+import { sendMessage } from "../utils.js";
 
 export const userKicked = async ({ text, kickDB, memberDB }) => {
 	const kicker = text.split("removed")[0].trim();

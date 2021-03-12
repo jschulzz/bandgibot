@@ -1,11 +1,12 @@
 import fs from 'fs'
 import axios from 'axios'
+import { sendMessage } from "../utils.js";
+
 
 export const birthdayCheck = async () => {
 	const dateString = `${new Date().getMonth() + 1}/${new Date().getDate()}`;
 	const birthdays = JSON.parse(fs.readFileSync(`birthdays.json`));
 	const birthdaysToday = birthdays[dateString] || [];
-	// console.log(birthdaysToday, dateString)
 	for (const bday of birthdaysToday) {
 		const { user_id, nickname, muted } = await memberDB.findOne({
 			name: bday,

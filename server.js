@@ -4,10 +4,10 @@ import cheerio from "cheerio";
 import nedb from "nedb-promises";
 import path from "path";
 
-import { didDukeWin } from "./cronjobs/didDukeWin";
-import { birthdayCheck } from "./cronjobs/birthdayCheck";
-import { updateMembers } from "./chat-listeners/updateMembers";
-import { userKicked } from "./chat-listeners/userKicked";
+import { didDukeWin } from "./cronjobs/didDukeWin.js";
+import { birthdayCheck } from "./cronjobs/birthdayCheck.js";
+import { updateMembers } from "./chat-listeners/updateMembers.js";
+import { userKicked } from "./chat-listeners/userKicked.js";
 
 const { CronJob } = cron;
 const app = express();
@@ -15,8 +15,8 @@ app.use(express.json());
 
 const everySecond = "* * * * * *";
 const everyMinute = "0 * * * * *";
-const everyHour = "0 0 * * * *"; // second 0, minute 0, of any hour, day, month, and year
-const everyDay = "0 0 7 * * *"; // second 0, minute 0, hour 7, on any day, month, and year
+const everyHour = "0 0 * * * *"; // second 0, minute 0, of every hour, day, month, and year
+const everyDay = "0 0 7 * * *"; // second 0, minute 0, hour 7, on every day, month, and year
 
 const memberDB = nedb.create({
 	filename: path.join("members.db"),
