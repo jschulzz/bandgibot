@@ -5,3 +5,6 @@ scores.json
 .env
 bandgibot.pem
 bandgibot.ppk
+**/*.db
+birthdays.json
+Birthdays.png
