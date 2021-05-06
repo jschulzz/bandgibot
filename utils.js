@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const sendMessage = async ({ message, attachments }) => {
+export const sendMessage = async ({ message, attachments=[] }) => {
 	try {
 		await axios.post(`https://api.groupme.com/v3/bots/post`, {
 			bot_id: process.env.BOT_ID,
@@ -8,6 +8,6 @@ export const sendMessage = async ({ message, attachments }) => {
 			attachments,
 		});
 	} catch (error) {
-		console.error(error);
+		console.error(error.message, error.response.data);
 	}
 };

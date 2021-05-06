@@ -8,6 +8,7 @@ import { didDukeWin } from "./cronjobs/didDukeWin.js";
 import { birthdayCheck } from "./cronjobs/birthdayCheck.js";
 import { updateMembers } from "./chat-listeners/updateMembers.js";
 import { userKicked } from "./chat-listeners/userKicked.js";
+import { checkForKarma } from "./chat-listeners/karma.js";
 
 const { CronJob } = cron;
 const app = express();
@@ -30,6 +31,10 @@ const dukeDB = nedb.create({
 	filename: path.join("duke.db"),
 	autoload: true,
 });
+const karmaDB = nedb.create({
+	filename: path.join("karma.db"),
+	autoload: true,
+});
 
 const DukeWinCheck = new CronJob(everyHour, didDukeWin(dukeDB), null, true);
 DukeWinCheck.start();
@@ -45,6 +50,7 @@ app.post("/", async (req, res) => {
 	if (system && text.includes("removed") && text.includes("from the group")) {
 		await userKicked({ text, memberDB, kickDB });
 	}
+	checkForKarma(karmaDB, message);
 });
 
 app.listen(process.env.PORT || 3000, () => {
