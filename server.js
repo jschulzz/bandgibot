@@ -9,6 +9,7 @@ import { birthdayCheck } from "./cronjobs/birthdayCheck.js";
 import { updateMembers } from "./chat-listeners/updateMembers.js";
 import { userKicked } from "./chat-listeners/userKicked.js";
 import { checkForKarma } from "./chat-listeners/karma.js";
+import apiRouter from "./api/router.js";
 
 const { CronJob } = cron;
 const app = express();
@@ -35,12 +36,20 @@ const karmaDB = nedb.create({
 	filename: path.join("karma.db"),
 	autoload: true,
 });
+const superlativesDB = nedb.create({
+	filename: path.join("superlatives.db"),
+	autoload: true,
+});
 
 const DukeWinCheck = new CronJob(everyHour, didDukeWin(dukeDB), null, true);
 DukeWinCheck.start();
 
 const BirthdayCheck = new CronJob(everyDay, birthdayCheck, null, true);
 BirthdayCheck.start();
+
+app.use("/api/v1", apiRouter);
+
+
 
 app.post("/", async (req, res) => {
 	const message = req.body;
@@ -51,6 +60,12 @@ app.post("/", async (req, res) => {
 		await userKicked({ text, memberDB, kickDB });
 	}
 	checkForKarma(karmaDB, message);
+});
+
+app.use((err, req, res, next) => {
+	// console.error(err);
+    res.status(500).json(err);
+    next(err)
 });
 
 app.listen(process.env.PORT || 3000, () => {
