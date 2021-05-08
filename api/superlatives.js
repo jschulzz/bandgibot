@@ -3,16 +3,17 @@ import Joi from "joi";
 import nedb from "nedb-promises";
 import path from "path";
 
+import { superlativesDB } from "../datastores.js";
+
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const superlativeSchema = Joi.object({
 	karma: Joi.number().required(),
 	message: Joi.string().optional().default(""),
 	image_url: Joi.string().optional().default(""),
 	creator: Joi.string().optional().default(""),
-});
-
-const superlativesDB = nedb.create({
-	filename: path.join("../superlatives.db"),
-	autoload: true,
 });
 
 const router = express.Router();
@@ -26,10 +27,12 @@ router.post("/", async (req, res) => {
 	await superlativesDB.insert({ ...validation.value });
 	res.send(validation);
 });
+
 router.get("/", async (req, res) => {
 	const allSuperlatives = await superlativesDB.find();
 	res.json(allSuperlatives);
 });
+
 router.delete("/:id", async (req, res) => {
 	if (!req.params.id) {
 		return res.status(400).json({ message: "Must supply an id to delete" });

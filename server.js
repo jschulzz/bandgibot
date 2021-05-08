@@ -1,8 +1,11 @@
 import express from "express";
 import cron from "cron";
-import cheerio from "cheerio";
-import nedb from "nedb-promises";
 import path from "path";
+import cors from "cors";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+
+import { memberDB, kickDB, dukeDB } from "./datastores.js";
 
 import { didDukeWin } from "./cronjobs/didDukeWin.js";
 import { birthdayCheck } from "./cronjobs/birthdayCheck.js";
@@ -11,35 +14,38 @@ import { userKicked } from "./chat-listeners/userKicked.js";
 import { checkForKarma } from "./chat-listeners/karma.js";
 import apiRouter from "./api/router.js";
 
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import nedbSessionStore from "nedb-session-store";
+const NedbStore = nedbSessionStore(session);
+
 const { CronJob } = cron;
 const app = express();
 app.use(express.json());
+app.use(cors());
+app.use(cookieParser());
+app.use(
+	session({
+		secret: process.env.SESSION_SECRET,
+		resave: true,
+		saveUninitialized: true,
+		cookie: {
+			path: "/",
+			httpOnly: true,
+			maxAge: 365 * 24 * 60 * 60 * 1000, // e.g. 1 year
+		},
+		store: new NedbStore({
+			filename: "sessions.db",
+		}),
+	})
+);
 
 const everySecond = "* * * * * *";
 const everyMinute = "0 * * * * *";
 const everyHour = "0 0 * * * *"; // second 0, minute 0, of every hour, day, month, and year
 const everyDay = "0 0 7 * * *"; // second 0, minute 0, hour 7, on every day, month, and year
-
-const memberDB = nedb.create({
-	filename: path.join("members.db"),
-	autoload: true,
-});
-const kickDB = nedb.create({
-	filename: path.join("kicks.db"),
-	autoload: true,
-});
-const dukeDB = nedb.create({
-	filename: path.join("duke.db"),
-	autoload: true,
-});
-const karmaDB = nedb.create({
-	filename: path.join("karma.db"),
-	autoload: true,
-});
-const superlativesDB = nedb.create({
-	filename: path.join("superlatives.db"),
-	autoload: true,
-});
 
 const DukeWinCheck = new CronJob(everyHour, didDukeWin(dukeDB), null, true);
 DukeWinCheck.start();
@@ -49,7 +55,7 @@ BirthdayCheck.start();
 
 app.use("/api/v1", apiRouter);
 
-
+app.use(express.static(path.resolve(__dirname, "./client/build")));
 
 app.post("/", async (req, res) => {
 	const message = req.body;
@@ -59,13 +65,18 @@ app.post("/", async (req, res) => {
 	if (system && text.includes("removed") && text.includes("from the group")) {
 		await userKicked({ text, memberDB, kickDB });
 	}
-	checkForKarma(karmaDB, message);
+	checkForKarma(message);
+});
+
+// All other GET requests not handled before will return our React app
+app.get("*", (req, res) => {
+	res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));
 });
 
 app.use((err, req, res, next) => {
 	// console.error(err);
-    res.status(500).json(err);
-    next(err)
+	res.status(500).json(err);
+	next(err);
 });
 
 app.listen(process.env.PORT || 3000, () => {

@@ -1,9 +1,8 @@
-import nedb from "nedb-promises";
-import path from "path";
+import { karmaDB } from "../datastores.js";
 
 import { sendMessage } from "../utils.js";
 
-export const checkForKarma = async (karmaDB, message) => {
+export const checkForKarma = async (message) => {
 	const { attachments, sender_type, text } = message || {};
 	const responses = [];
 	if (sender_type !== "user") {
