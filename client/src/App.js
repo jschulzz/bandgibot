@@ -4,32 +4,43 @@ import Triggers from "./triggers/triggers";
 import Superlatives from "./superlatives/superlatives";
 import Leaderboard from "./leaderboard/leaderboard";
 import Login from "./login/login";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+	BrowserRouter as Router,
+	Switch,
+	Route,
+	Link,
+	Redirect,
+} from "react-router-dom";
 import { API_URL } from "./constants";
 
 export const App = () => {
-	const [isLoggedIn, setIsLoggedIn] = useState();
+	const [isLoggedIn, setIsLoggedIn] = useState(false);
+	const [hasGroupAccess, setHasGroupAccess] = useState(false);
 
 	const logout = async () => {
 		await fetch(API_URL + "/auth/logout");
 		setIsLoggedIn(false);
+		setHasGroupAccess(false);
 	};
 
 	useEffect(() => {
+		const canAccess = async () => {
+			const res = await fetch(API_URL + "/auth/group-status");
+			const { isInGroup } = await res.json();
+			setHasGroupAccess(isInGroup);
+		};
 		const getLoginStatus = async () => {
 			const res = await fetch(API_URL + "/auth/loggedin");
 			const logstatus = await res.json();
 			setIsLoggedIn(logstatus.isLoggedIn);
 		};
 		getLoginStatus();
+		canAccess();
 	}, []);
 	return (
 		<Router>
 			<div>
-				<nav
-					role="navigation"
-					aria-label="main navigation"
-				>
+				<nav role="navigation" aria-label="main navigation">
 					<div className="navbar-menu">
 						<div className="navbar-start">
 							<Link to="/leaderboard" className="navbar-item icon-text">
@@ -81,15 +92,36 @@ export const App = () => {
 					<Route path="/login">
 						<Login />
 					</Route>
-					<Route path="/superlatives">
+					<Route
+						path="/superlatives"
+						render={() => {
+							return hasGroupAccess ? (
+								<Superlatives />
+							) : (
+								<Redirect to="/login" />
+							);
+						}}
+					>
 						<Superlatives />
 					</Route>
-					<Route path="/triggers">
+					<Route
+						path="/triggers"
+						render={() => {
+							return hasGroupAccess ? <Triggers /> : <Redirect to="/login" />;
+						}}
+					>
 						<Triggers />
 					</Route>
-					<Route path="/leaderboard">
-						<Leaderboard />
-					</Route>
+					<Route
+						path="/leaderboard"
+						render={() => {
+							return hasGroupAccess ? (
+								<Leaderboard />
+							) : (
+								<Redirect to="/login" />
+							);
+						}}
+					></Route>
 				</Switch>
 			</div>
 		</Router>

@@ -27,7 +27,7 @@ router.get("/logout", async (req, res) => {
 
 router.get("/group-status", async (req, res) => {
 	const { isInGroup } = req.session;
-	res.json(isInGroup);
+	res.json({ isInGroup });
 });
 router.get("/loggedin", async (req, res) => {
 	const { access_token } = req.session;
