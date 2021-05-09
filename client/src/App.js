@@ -5,18 +5,19 @@ import Superlatives from "./superlatives/superlatives";
 import Leaderboard from "./leaderboard/leaderboard";
 import Login from "./login/login";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { API_URL } from "./constants";
 
 export const App = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState();
 
 	const logout = async () => {
-		await fetch("http://localhost:3000/api/v1/auth/logout");
+		await fetch(API_URL + "/auth/logout");
 		setIsLoggedIn(false);
 	};
 
 	useEffect(() => {
 		const getLoginStatus = async () => {
-			const res = await fetch("http://localhost:3000/api/v1/auth/loggedin");
+			const res = await fetch(API_URL + "/auth/loggedin");
 			const logstatus = await res.json();
 			setIsLoggedIn(logstatus.isLoggedIn);
 		};
@@ -26,7 +27,6 @@ export const App = () => {
 		<Router>
 			<div>
 				<nav
-					className="is-transparent"
 					role="navigation"
 					aria-label="main navigation"
 				>

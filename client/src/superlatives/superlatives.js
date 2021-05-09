@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_URL } from "../constants.js";
 import "./superlatives.css";
 
 const Superlatives = () => {
@@ -6,7 +7,7 @@ const Superlatives = () => {
 
 	useEffect(() => {
 		const getSuperlatives = async () => {
-			const res = await fetch("http://localhost:3000/api/v1/superlative/");
+			const res = await fetch(API_URL + "/superlative/");
 			const logstatus = await res.json();
 			console.log(logstatus);
 		};

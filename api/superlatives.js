@@ -1,13 +1,8 @@
 import express from "express";
 import Joi from "joi";
-import nedb from "nedb-promises";
 import path from "path";
 
 import { superlativesDB } from "../datastores.js";
-
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const superlativeSchema = Joi.object({
 	karma: Joi.number().required(),

@@ -32,6 +32,7 @@ export const checkForKarma = async (message) => {
 				karmaRegex.lastIndex = 0;
 				const regexResult = karmaRegex.exec(String(match));
 				const matchingText = regexResult[1].trim();
+				const isUser = loci.has(regexResult.index);
 				const change =
 					Math.min(regexResult[2].length, 10) *
 					(regexResult[3] === "-" ? -1 : 1);
@@ -41,6 +42,7 @@ export const checkForKarma = async (message) => {
 					index: regexResult.index,
 					value: matchingText.slice(1),
 					change,
+					isUser,
 				};
 			})
 			.filter((target, index, all) => {
@@ -49,7 +51,13 @@ export const checkForKarma = async (message) => {
 		for (const target of uniqueTargets) {
 			await karmaDB.update(
 				{ _id: target.id },
-				{ $inc: { karma: Number(target.change) } },
+				{
+					$inc: { karma: Number(target.change) },
+					$set: {
+						value: target.value,
+						isUser: target.isUser,
+					},
+				},
 				{ upsert: true }
 			);
 

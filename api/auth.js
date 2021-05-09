@@ -16,7 +16,7 @@ router.get("/login", async (req, res) => {
 	} else {
 		req.session.isInGroup = false;
 	}
-	res.redirect("../../../leaderboard");
+	res.redirect("../../../superlatives");
 });
 router.get("/logout", async (req, res) => {
 	req.session.destroy((err) => {

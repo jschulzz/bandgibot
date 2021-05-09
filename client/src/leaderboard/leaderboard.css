@@ -1,0 +1,30 @@
+.switch-container {
+	justify-content: space-between !important;
+	max-width: 100%;
+	margin: 1rem 3rem;
+	flex-wrap: wrap;
+}
+
+.b-table {
+	margin-bottom: 3rem;
+}
+
+.switch-container > * {
+	margin: 1rem 0 !important;
+}
+
+.searchbox {
+	flex-basis: 50%;
+}
+
+@media only screen and (max-width: 768px) {
+	.searchbox {
+		flex-basis: 100%;
+		flex-shrink: 0;
+		flex-grow: 1;
+	}
+
+	.switch-container {
+		margin: 1rem 2rem;
+	}
+}

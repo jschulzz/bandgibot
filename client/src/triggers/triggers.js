@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_URL } from "../constants";
 import "./triggers.css";
 
 const Triggers = () => {
@@ -6,7 +7,7 @@ const Triggers = () => {
 
 	useEffect(() => {
 		const getTriggers = async () => {
-			const res = await fetch("http://localhost:3000/api/v1/triggers/");
+			const res = await fetch(API_URL + "/triggers");
 			const logstatus = await res.json();
 			console.log(logstatus);
 		};
