@@ -39,7 +39,6 @@ const Table = ({ karma, showConcepts, showUsers, searchTerm }) => {
 		});
 		const orderedRecords = sortAsc ? sortedRecords : sortedRecords.reverse();
 
-		console.log(orderedRecords, sortField, sortAsc);
 		setDisplayedRecords(orderedRecords.slice(0, 10));
 	}, [showConcepts, showUsers, karma, sortAsc, sortField, searchTerm]);
 
@@ -130,7 +129,6 @@ const Leaderboard = () => {
 	const [searchTerm, setSearchTerm] = useState("");
 
 	useEffect(() => {
-		console.log(process);
 		const getLoginStatus = async () => {
 			const res = await fetch(API_URL + "/karma");
 			const karma = await res.json();

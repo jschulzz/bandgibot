@@ -2962,6 +2962,11 @@ bulma-switch-control@^1.1.1:
   dependencies:
     bulma "^0.9.0"
 
+bulma-toast@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/bulma-toast/-/bulma-toast-2.3.0.tgz#43062de85104ee66719b723c5d1691d9e46954d6"
+  integrity sha512-HfMITkQv4GnrrvwMnpxtNlfdQcmVdl09wGqboqMzLuRWSDDM9EBghfuAeh6jPCKJpFvAeadw7N12XRY1AAJgyw==
+
 bulma@^0.9.0, bulma@^0.9.2:
   version "0.9.2"
   resolved "https://registry.yarnpkg.com/bulma/-/bulma-0.9.2.tgz#340011e119c605f19b8ca886bfea595f1deaf23c"
@@ -6969,7 +6974,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
-"lodash@>=3.5 <5", lodash@^4.13.1, lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.5:
+"lodash@>=3.5 <5", lodash@^4.17.11, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.5:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -8814,7 +8819,7 @@ prompts@2.4.0, prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
-prop-types@^15.5.10, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -8989,14 +8994,6 @@ react-app-polyfill@^2.0.0:
     raf "^3.4.1"
     regenerator-runtime "^0.13.7"
     whatwg-fetch "^3.4.1"
-
-react-data-components-bulma@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/react-data-components-bulma/-/react-data-components-bulma-1.2.3.tgz#0a80d1e400e095b35ecf3132344a4943cbd2e5c3"
-  integrity sha512-UW8wVsNuqVhHHc6ceO3RZSLEmYkHmkg+VUHkjaV8B+82OB+yaQKUzT1MppQlsmrePqFwzFGSkqtKBJLCNfFRWg==
-  dependencies:
-    lodash "^4.13.1"
-    prop-types "^15.5.10"
 
 react-dev-utils@^11.0.3:
   version "11.0.4"

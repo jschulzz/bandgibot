@@ -9,6 +9,12 @@ router.get("/login", async (req, res) => {
 	const groups = await axios.get(
 		`https://api.groupme.com/v3/groups?token=${access_token}`
 	);
+	const me = await axios.get(
+		`https://api.groupme.com/v3/users/me?token=${access_token}`
+	);
+	req.session.user_id = me.data.response.id;
+	const admins = process.env.ADMIN_IDS.split(",");
+    req.session.isAdmin = admins.includes(req.session.user_id);
 	if (
 		groups.data.response.some((x) => x.group_id === process.env.TARGET_GROUP_ID)
 	) {
@@ -25,9 +31,9 @@ router.get("/logout", async (req, res) => {
 	res.sendStatus(200);
 });
 
-router.get("/group-status", async (req, res) => {
-	const { isInGroup } = req.session;
-	res.json({ isInGroup });
+router.get("/permissions", async (req, res) => {
+	const { isInGroup, isAdmin, access_token } = req.session;
+	res.json({ isInGroup, isAdmin, isLoggedIn: !!access_token });
 });
 router.get("/loggedin", async (req, res) => {
 	const { access_token } = req.session;

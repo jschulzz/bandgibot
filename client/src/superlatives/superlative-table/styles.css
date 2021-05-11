@@ -1,0 +1,24 @@
+.superlative-card {
+	min-width: 15rem;
+	flex: 1;
+	margin: 0.5rem;
+}
+
+.card-image {
+	display: flex;
+}
+.card-image > .image {
+	object-fit: contain;
+	height: 150px;
+	flex: 1;
+}
+
+.data-row {
+	border-bottom: 2px #f6f6f6 solid;
+}
+
+.cards-container {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}

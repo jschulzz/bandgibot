@@ -1,45 +1,53 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext } from "react";
 import "./App.css";
-import Triggers from "./triggers/triggers";
-import Superlatives from "./superlatives/superlatives";
-import Leaderboard from "./leaderboard/leaderboard";
-import Login from "./login/login";
+import Triggers from "./triggers";
+import Superlatives from "./superlatives";
+import Leaderboard from "./leaderboard";
+import Login from "./login";
 import {
-	BrowserRouter as Router,
 	Switch,
 	Route,
 	Link,
 	Redirect,
+	useLocation,
 } from "react-router-dom";
 import { API_URL } from "./constants";
 
+export const AuthContext = createContext({
+	isLoggedIn: false,
+	isInGroup: false,
+	isAdmin: false,
+});
+
 export const App = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [hasGroupAccess, setHasGroupAccess] = useState(false);
+	const [isInGroup, setIsInGroup] = useState(false);
+	const [isAdmin, setIsAdmin] = useState(false);
 
 	const logout = async () => {
 		await fetch(API_URL + "/auth/logout");
 		setIsLoggedIn(false);
-		setHasGroupAccess(false);
+		setIsInGroup(false);
+		setIsAdmin(false);
 	};
 
+	const getAuth = async () => {
+		const res = await fetch(API_URL + "/auth/permissions");
+		const { isInGroup, isAdmin, isLoggedIn } = await res.json();
+		setIsInGroup(isInGroup);
+		setIsAdmin(isAdmin);
+		setIsLoggedIn(isLoggedIn);
+	};
+
+	let location = useLocation();
+
 	useEffect(() => {
-		const canAccess = async () => {
-			const res = await fetch(API_URL + "/auth/group-status");
-			const { isInGroup } = await res.json();
-			setHasGroupAccess(isInGroup);
-		};
-		const getLoginStatus = async () => {
-			const res = await fetch(API_URL + "/auth/loggedin");
-			const logstatus = await res.json();
-			setIsLoggedIn(logstatus.isLoggedIn);
-		};
-		getLoginStatus();
-		canAccess();
-	}, []);
+		getAuth();
+	}, [location]);
+
 	return (
-		<Router>
-			<div>
+		<AuthContext.Provider value={{ isLoggedIn, isAdmin, isInGroup }}>
+			<div className="main-container">
 				<nav role="navigation" aria-label="main navigation">
 					<div className="navbar-menu">
 						<div className="navbar-start">
@@ -95,27 +103,27 @@ export const App = () => {
 					<Route
 						path="/superlatives"
 						render={() => {
-							return hasGroupAccess ? (
+							return isLoggedIn && isInGroup ? (
 								<Superlatives />
 							) : (
 								<Redirect to="/login" />
 							);
 						}}
-					>
-						<Superlatives />
-					</Route>
+					></Route>
 					<Route
 						path="/triggers"
 						render={() => {
-							return hasGroupAccess ? <Triggers /> : <Redirect to="/login" />;
+							return isLoggedIn && isInGroup ? (
+								<Triggers />
+							) : (
+								<Redirect to="/login" />
+							);
 						}}
-					>
-						<Triggers />
-					</Route>
+					></Route>
 					<Route
 						path="/leaderboard"
 						render={() => {
-							return hasGroupAccess ? (
+							return isLoggedIn && isInGroup ? (
 								<Leaderboard />
 							) : (
 								<Redirect to="/login" />
@@ -124,6 +132,6 @@ export const App = () => {
 					></Route>
 				</Switch>
 			</div>
-		</Router>
+		</AuthContext.Provider>
 	);
 };
