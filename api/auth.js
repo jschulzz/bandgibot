@@ -15,6 +15,7 @@ router.get("/login", async (req, res) => {
 	req.session.user_id = me.data.response.id;
 	const admins = process.env.ADMIN_IDS.split(",");
     req.session.isAdmin = admins.includes(req.session.user_id);
+    req.session.isLoggedIn = !!req.session.access_token
 	if (
 		groups.data.response.some((x) => x.group_id === process.env.TARGET_GROUP_ID)
 	) {
@@ -32,8 +33,8 @@ router.get("/logout", async (req, res) => {
 });
 
 router.get("/permissions", async (req, res) => {
-	const { isInGroup, isAdmin, access_token } = req.session;
-	res.json({ isInGroup, isAdmin, isLoggedIn: !!access_token });
+	const { isInGroup, isAdmin, isLoggedIn } = req.session;
+	res.json({ isInGroup, isAdmin, isLoggedIn });
 });
 router.get("/loggedin", async (req, res) => {
 	const { access_token } = req.session;

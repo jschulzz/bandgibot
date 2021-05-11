@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
 	if (validation.error) {
 		return res.status(400).json(validation.error.details);
 	}
-	if (!req.session.isInGroup || !res.session.isLoggedIn) {
+	if (!req.session.isInGroup || !req.session.isLoggedIn) {
 		return res.status(401).json({ message: "User does not have access" });
 	}
 	await superlativesDB.insert({

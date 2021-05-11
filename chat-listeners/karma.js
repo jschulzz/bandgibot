@@ -1,4 +1,4 @@
-import { karmaDB } from "../datastores.js";
+import { karmaDB, superlativesDB } from "../datastores.js";
 
 import { sendMessage } from "../utils.js";
 
@@ -26,6 +26,7 @@ export const checkForKarma = async (message) => {
 	}
 
 	const matchingPhrases = text.match(karmaRegex);
+	let superlative = {};
 	if (matchingPhrases && matchingPhrases.length) {
 		const uniqueTargets = matchingPhrases
 			.map((match) => {
@@ -69,7 +70,26 @@ export const checkForKarma = async (message) => {
 			responses.push(
 				`${target.value}${possesive} karma has ${direction} to ${karma}`
 			);
+
+			const [firstMatch] = await superlativesDB.find({ karma });
+			if (firstMatch) {
+				superlative = {
+					message: `Congratulations ${target.value}, you've reached ${karma} karma. ${firstMatch.message}`,
+					attachments: [
+						{
+							type: "image",
+							url: firstMatch.image_url,
+						},
+					],
+				};
+			}
 		}
 		await sendMessage({ message: responses.join("\n") });
+		if (superlative.message) {
+			await sendMessage({
+				message: superlative.message,
+				attachments: superlative.attachments,
+			});
+		}
 	}
 };
