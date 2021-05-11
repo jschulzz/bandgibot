@@ -57,7 +57,7 @@ app.use("/api/v1", apiRouter);
 
 app.use(express.static(path.resolve(__dirname, "./client/build")));
 
-app.post("/", async (req, res) => {
+app.post("/chatbot", async (req, res) => {
 	const message = req.body;
 	const { text, system, group_id } = message;
     console.log(text);
