@@ -67,12 +67,8 @@ export const checkForKarma = async (message) => {
 				target.value.slice(-1).toLowerCase() === "s" ? "'" : "'s";
 			const direction = target.change > 0 ? "increased" : "decreased";
 
-			responses.push(
-				`${target.value}${possesive} karma has ${direction} to ${karma}`
-			);
-
 			const [firstMatch] = await superlativesDB.find({ karma });
-			if (firstMatch) {
+			if (firstMatch && target.isUser) {
 				superlative = {
 					message: `Congratulations ${target.value}, you've reached ${karma} karma. ${firstMatch.message}`,
 					attachments: [
@@ -82,6 +78,10 @@ export const checkForKarma = async (message) => {
 						},
 					],
 				};
+			} else {
+				responses.push(
+					`${target.value}${possesive} karma has ${direction} to ${karma}`
+				);
 			}
 		}
 		await sendMessage({ message: responses.join("\n") });
