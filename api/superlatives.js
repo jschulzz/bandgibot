@@ -58,11 +58,11 @@ router.get("/mine", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
+	if (!req.session.isAdmin || !req.session.isLoggedIn) {
+		return res.status(401).json({ message: "User does not have access" });
+	}
 	if (!req.params.id) {
 		return res.status(400).json({ message: "Must supply an id to delete" });
-	}
-	if (!req.session.isAdmin) {
-		return res.status(401).json({ message: "User does not have access" });
 	}
 	await superlativesDB.remove({ _id: req.params.id });
 	res.json({ message: "Superlative deleted" });

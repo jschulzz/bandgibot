@@ -57,17 +57,13 @@ app.use("/api/v1", apiRouter);
 
 app.use(express.static(path.resolve(__dirname, "./client/build")));
 
-app.post("/", (req, res) => {
-	console.log(req);
-	res.sendStatus(200);
-});
-
 app.post("/chatbot", async (req, res) => {
 	const message = req.body;
 	const { text, system, group_id } = message;
 	console.log(text);
 	if (!text || !group_id) {
-		console.log(req);
+        console.log(req);
+        return req.sendStatus(400)
 	}
 	await updateMembers({ group_id, memberDB, chatBody: req });
 	if (system && text.includes("removed") && text.includes("from the group")) {
