@@ -50,7 +50,7 @@ const everyDay = "0 0 7 * * *"; // second 0, minute 0, hour 7, on every day, mon
 const DukeWinCheck = new CronJob(everyHour, didDukeWin(dukeDB), null, true);
 DukeWinCheck.start();
 
-const BirthdayCheck = new CronJob(everyDay, birthdayCheck, null, true);
+const BirthdayCheck = new CronJob(everyDay, birthdayCheck(memberDB), null, true);
 BirthdayCheck.start();
 
 app.use("/api/v1", apiRouter);
