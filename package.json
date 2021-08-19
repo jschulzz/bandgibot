@@ -6,7 +6,8 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev:start": "nodemon -r dotenv/config server.js",
-		"start": "PORT=3000 node -r dotenv/config server.js"
+		"start": "PORT=3000 node -r dotenv/config server.js",
+		"build": "cd client && npm run build"
 	},
 	"author": "",
 	"license": "ISC",
@@ -14,11 +15,17 @@
 	"dependencies": {
 		"axios": "^0.20.0",
 		"cheerio": "^1.0.0-rc.3",
+		"cookie-parser": "^1.4.5",
+		"cors": "^2.8.5",
 		"cron": "^1.8.2",
 		"dotenv": "^8.2.0",
 		"express": "^4.17.1",
+		"express-session": "^1.17.1",
+		"helmet": "^4.6.0",
+		"joi": "^17.4.0",
 		"nedb": "^1.8.0",
 		"nedb-promises": "^4.1.1",
+		"nedb-session-store": "^1.1.2",
 		"nodemon": "^2.0.5"
 	},
 	"nodemonConfig": {
@@ -26,5 +33,6 @@
 			"/scores.json",
 			"/members.json"
 		]
-	}
+	},
+	"proxy": "http://localhost:3000"
 }

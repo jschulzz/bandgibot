@@ -1,6 +1,7 @@
 import { sendMessage } from "../utils.js";
+import { kickDB, memberDB } from "../datastores.js";
 
-export const userKicked = async ({ text, kickDB, memberDB }) => {
+export const userKicked = async ({ text }) => {
 	const kicker = text.split("removed")[0].trim();
 	const kickee = text.split("removed")[1].split("from the group")[0].trim();
 	const { user_id: kicker_id, name: kicker_name } = await memberDB.findOne({

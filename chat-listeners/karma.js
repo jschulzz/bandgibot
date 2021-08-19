@@ -1,9 +1,8 @@
-import nedb from "nedb-promises";
-import path from "path";
+import { karmaDB, superlativesDB } from "../datastores.js";
 
 import { sendMessage } from "../utils.js";
 
-export const checkForKarma = async (karmaDB, message) => {
+export const checkForKarma = async (message) => {
 	const { attachments, sender_type, text } = message || {};
 	const responses = [];
 	if (sender_type !== "user") {
@@ -27,12 +26,14 @@ export const checkForKarma = async (karmaDB, message) => {
 	}
 
 	const matchingPhrases = text.match(karmaRegex);
+	let superlative = {};
 	if (matchingPhrases && matchingPhrases.length) {
 		const uniqueTargets = matchingPhrases
 			.map((match) => {
 				karmaRegex.lastIndex = 0;
 				const regexResult = karmaRegex.exec(String(match));
 				const matchingText = regexResult[1].trim();
+				const isUser = loci.has(regexResult.index);
 				const change =
 					Math.min(regexResult[2].length, 10) *
 					(regexResult[3] === "-" ? -1 : 1);
@@ -42,6 +43,7 @@ export const checkForKarma = async (karmaDB, message) => {
 					index: regexResult.index,
 					value: matchingText.slice(1),
 					change,
+					isUser,
 				};
 			})
 			.filter((target, index, all) => {
@@ -50,7 +52,13 @@ export const checkForKarma = async (karmaDB, message) => {
 		for (const target of uniqueTargets) {
 			await karmaDB.update(
 				{ _id: target.id },
-				{ $inc: { karma: Number(target.change) } },
+				{
+					$inc: { karma: Number(target.change) },
+					$set: {
+						value: target.value,
+						isUser: target.isUser,
+					},
+				},
 				{ upsert: true }
 			);
 
@@ -59,10 +67,29 @@ export const checkForKarma = async (karmaDB, message) => {
 				target.value.slice(-1).toLowerCase() === "s" ? "'" : "'s";
 			const direction = target.change > 0 ? "increased" : "decreased";
 
-			responses.push(
-				`${target.value}${possesive} karma has ${direction} to ${karma}`
-			);
+			const [firstMatch] = await superlativesDB.find({ karma });
+			if (firstMatch && target.isUser) {
+				superlative = {
+					message: `Congratulations ${target.value}, you've reached ${karma} karma. ${firstMatch.message}`,
+					attachments: [
+						{
+							type: "image",
+							url: firstMatch.image_url,
+						},
+					],
+				};
+			} else {
+				responses.push(
+					`${target.value}${possesive} karma has ${direction} to ${karma}`
+				);
+			}
 		}
 		await sendMessage({ message: responses.join("\n") });
+		if (superlative.message) {
+			await sendMessage({
+				message: superlative.message,
+				attachments: superlative.attachments,
+			});
+		}
 	}
 };

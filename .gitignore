@@ -8,3 +8,6 @@ bandgibot.ppk
 **/*.db
 birthdays.json
 Birthdays.png
+/client/src/constants.js
+bandgibot_net.zip
+bandgibot_net/
