@@ -37,3 +37,18 @@ export const birthdayCheck = (memberDB) => {
 		}
 	};
 };
+
+/*
+
+{
+	"text": "Happy Birthday @D Buu!!",
+	"bot_id": "cc93187a792a686f9de0951401",
+	"attachments": [
+		{ "type": "mentions", "user_ids": ["30622960"], "loci": [15, 6] },
+		{
+			"type": "image",
+			"url": "https://media0.giphy.com/media/uyHf2xWInLB3xmI1HV/giphy.gif"
+		}
+	]
+}
+*/

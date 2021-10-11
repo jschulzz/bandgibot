@@ -60,11 +60,10 @@ app.use(express.static(path.resolve(__dirname, "./client/build")));
 app.post("/chatbot", async (req, res) => {
 	const message = req.body;
 	const { text, system, group_id } = message;
-	console.log(text);
 	if (!text || !group_id) {
-        console.log(req);
-        return req.sendStatus(400)
+        return res.sendStatus(400)
 	}
+    console.log(text);
 	await updateMembers({ group_id, memberDB, chatBody: req });
 	if (system && text.includes("removed") && text.includes("from the group")) {
 		await userKicked({ text, memberDB, kickDB });
