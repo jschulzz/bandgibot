@@ -5,8 +5,8 @@
 	"main": "server.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev:start": "nodemon -r dotenv/config server.js",
-		"start": "PORT=3000 node -r dotenv/config server.js >> bandgibot.log",
+		"dev:start": "pm2 restart ecosystem.config.cjs --env development --watch",
+		"start": "pm2 restart ecosystem.config.cjs --env production",
 		"build": "cd client && npm run build"
 	},
 	"author": "",
