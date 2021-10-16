@@ -63,13 +63,14 @@ app.post("/chatbot", async (req, res) => {
 	console.log(text);
 	if (!text || !group_id) {
         console.log(req);
-        return req.sendStatus(400)
+        return res.sendStatus(400)
 	}
 	await updateMembers({ group_id, memberDB, chatBody: req });
 	if (system && text.includes("removed") && text.includes("from the group")) {
 		await userKicked({ text, memberDB, kickDB });
 	}
-	checkForKarma(message);
+    checkForKarma(message);
+    res.sendStatus(200)
 });
 
 // All other GET requests not handled before will return our React app
