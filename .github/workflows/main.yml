@@ -4,13 +4,11 @@ on:
     branches: 
       - main
   workflow_dispatch:
-    branches: 
-      - '**'
  
 jobs:
   deploy:
     runs-on: ubuntu-latest
-     steps:
+    steps:
       - uses: actions/checkout@v2 
       - name: Deploy in EC2
         env:
