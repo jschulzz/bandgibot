@@ -1,26 +1,16 @@
-name: CI/CD counter app
-
+name: AWS Deploy
 on:
   push:
     branches: [ main ]
-
+ 
 jobs:
   deploy:
-    needs: build
     runs-on: ubuntu-latest
-    
     steps:
-      - uses: actions/checkout@v2 
-      - name: Deploy in EC2
-        env:
-            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
-            HOSTNAME : ${{ secrets.HOSTNAME  }}
-            USER_NAME : ${{ secrets.USER_NAME  }}
-            
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-          
-            #Now we have got the access of EC2 and we will start the deploy .
-            cd /home/bandgibot/CounterApp &&
-            ./bin/deploy.sh 
+    - name: Deploy to nerdhood.de
+      uses: appleboy/ssh-action@master
+      env:
+        USERNAME: ${{ secrets.USER_NAME  }}
+        HOST: ${{ secrets.HOSTNAME  }}
+        SCRIPT: ./home/bandgibot/bin/deploy.sh
+        KEY: ${{ secrets.AWS_PRIVATE_KEY }}
