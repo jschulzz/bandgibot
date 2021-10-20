@@ -66,7 +66,6 @@ router.get("/logout", (req, res) => {
 
 router.get("/permissions", async (req, res) => {
 	const { isInGroup, isAdmin, isLoggedIn } = req.session;
-	console.debug("Getting permissions", req.session);
 	res.json({ isInGroup, isAdmin, isLoggedIn });
 });
 
