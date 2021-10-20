@@ -43,14 +43,20 @@ router.get("/login", async (req, res) => {
 		req.session.isInGroup = true;
 	} else {
 		req.session.isInGroup = false || process.env.NODE_ENV == "development";
-	}
+    }
+    
 	res.redirect("../../../superlatives");
 });
 router.get("/logout", async (req, res) => {
 	req.session.destroy((err) => {
-		console.log("Logout Error", err);
+        if(err)
+            {console.log("Logout Error", err);}
+        else {
+            console.log("User logged out")
+            req.session = null
+            res.redirect('/login')
+        }
 	});
-	res.sendStatus(200);
 });
 
 router.get("/permissions", async (req, res) => {
