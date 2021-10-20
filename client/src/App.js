@@ -4,13 +4,7 @@ import Triggers from "./triggers";
 import Superlatives from "./superlatives";
 import Leaderboard from "./leaderboard";
 import Login from "./login";
-import {
-	Switch,
-	Route,
-	Link,
-	Redirect,
-	useLocation,
-} from "react-router-dom";
+import { Switch, Route, Link, Redirect, useLocation } from "react-router-dom";
 import { API_URL } from "./constants";
 
 export const AuthContext = createContext({
@@ -23,13 +17,6 @@ export const App = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [isInGroup, setIsInGroup] = useState(false);
 	const [isAdmin, setIsAdmin] = useState(false);
-
-	const logout = async () => {
-		await fetch(API_URL + "/auth/logout");
-		setIsLoggedIn(false);
-		setIsInGroup(false);
-		setIsAdmin(false);
-	};
 
 	const getAuth = async () => {
 		const res = await fetch(API_URL + "/auth/permissions");
@@ -83,7 +70,7 @@ export const App = () => {
 							) : (
 								<Link
 									className="navbar-item icon-text button is-link"
-									onClick={logout}
+									to="/login"
 								>
 									<span className="nav-text">Logout</span>
 									<span className="icon has-text-link">
@@ -97,6 +84,9 @@ export const App = () => {
 				</nav>
 
 				<Switch>
+					<Route exact path="/">
+						<Redirect to="/login" />
+					</Route>
 					<Route path="/login">
 						<Login />
 					</Route>
