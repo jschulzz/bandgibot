@@ -65,12 +65,16 @@ app.use(express.static(path.resolve(__dirname, "./client/build")));
 
 app.post("/chatbot", async (req, res) => {
 	const message = req.body;
-	const { text, system, group_id } = message;
-	if (!text || !group_id) {
+	const { text, system, group_id, attachments } = message;
+	if ((!text && !attachments) || !group_id) {
 		console.log(req.body);
 		return res.sendStatus(400);
 	}
-	console.log(`Message Recieved - [${message.sender_type}] - `, text);
+	console.log(
+		`Message Recieved - [${message.sender_type}:${message.name}] -`,
+        text,
+        `- ${attachments.length} attachments`
+	);
 	await updateMembers({ group_id, memberDB, chatBody: req });
 	if (system && text.includes("removed") && text.includes("from the group")) {
 		await userKicked({ text, memberDB, kickDB });

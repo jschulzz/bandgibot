@@ -5,7 +5,7 @@
 	"main": "server.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev:start": "pm2 restart ecosystem.config.cjs --env development --watch",
+		"dev:start": "pm2 restart ecosystem.config.cjs --env development",
 		"start": "pm2 restart ecosystem.config.cjs --env production",
 		"build": "cd client && npm run build"
 	},
