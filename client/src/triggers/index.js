@@ -28,7 +28,7 @@ const Triggers = () => {
 		<div className="superlative-page">
 			<section className="hero is-info">
 				<div className="hero-body">
-					<p className="title">Superlatives</p>
+					<p className="title">Triggers</p>
 				</div>
 			</section>
 			<div className="superlative-tabs tabs is-boxed is-centered">
