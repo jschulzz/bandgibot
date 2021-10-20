@@ -1,39 +1,69 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../App.js";
 import { API_URL } from "../constants";
+import TriggerForm from "./trigger-form";
+import TriggerTable from "./trigger-table";
 import "./triggers.css";
 
 const Triggers = () => {
-	const [message, setMessage] = useState("");
+	const [activeTab, setActiveTab] = useState(0);
+	const [myTriggers, setMyTriggers] = useState([]);
+	const [allTriggers, setAllTriggers] = useState([]);
+
+	const auth = useContext(AuthContext);
 
 	useEffect(() => {
 		const getTriggers = async () => {
-			const res = await fetch(API_URL + "/triggers");
-			const logstatus = await res.json();
+			let res = await fetch(API_URL + "/triggers/mine");
+			let triggers = await res.json();
+			setMyTriggers(triggers);
+			res = await fetch(API_URL + "/triggers");
+			triggers = await res.json();
+			setAllTriggers(triggers);
 		};
 		getTriggers();
 	}, []);
 
 	return (
-		<div>
+		<div className="superlative-page">
 			<section className="hero is-info">
 				<div className="hero-body">
-					<p className="title">All Triggers</p>
-					<p className="subtitle">{message}</p>
+					<p className="title">Superlatives</p>
 				</div>
 			</section>
-            <div className="columns">
-				<div className="column is-half is-offset-one-quarter">
-					<img
-						className="image coming-soon"
-                        src="https://i.redd.it/k23fdquqfhe11.jpg"
-                        alt="Coming Soon"
-					/>
-					<div className="has-text-centered is-size-3">
-						This page is under construction
-					</div>
-					<div className="has-text-centered is-size-3">Come back later!</div>
-				</div>
+			<div className="superlative-tabs tabs is-boxed is-centered">
+				<ul>
+					<li
+						className={activeTab === 0 ? "is-active" : ""}
+						onClick={() => setActiveTab(0)}
+					>
+						<a>
+							<span>Submission</span>
+						</a>
+					</li>
+					<li
+						className={activeTab === 1 ? "is-active" : ""}
+						onClick={() => setActiveTab(1)}
+					>
+						<a>
+							<span>My Triggers</span>
+						</a>
+					</li>
+					{auth.isAdmin && (
+						<li
+							className={activeTab === 2 ? "is-active" : ""}
+							onClick={() => setActiveTab(2)}
+						>
+							<a>
+								<span>All Triggers</span>
+							</a>
+						</li>
+					)}
+				</ul>
 			</div>
+			{activeTab === 0 && <TriggerForm />}
+			{activeTab === 1 && <TriggerTable triggers={myTriggers} />}
+			{activeTab === 2 && <TriggerTable triggers={allTriggers} />}
 		</div>
 	);
 };

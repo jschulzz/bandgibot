@@ -10,7 +10,7 @@ module.exports = {
 			},
 			env_development: {
 				NODE_ENV: "development",
-				PORT: 4000,
+				PORT: 3000,
 			},
 		},
 	],

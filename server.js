@@ -12,6 +12,7 @@ import { birthdayCheck } from "./cronjobs/birthdayCheck.js";
 import { updateMembers } from "./chat-listeners/updateMembers.js";
 import { userKicked } from "./chat-listeners/userKicked.js";
 import { checkForKarma } from "./chat-listeners/karma.js";
+import { checkForTriggers } from "./chat-listeners/trigger.js";
 import apiRouter from "./api/router.js";
 
 import { fileURLToPath } from "url";
@@ -50,7 +51,12 @@ const everyDay = "0 0 7 * * *"; // second 0, minute 0, hour 7, on every day, mon
 const DukeWinCheck = new CronJob(everyHour, didDukeWin(dukeDB), null, true);
 DukeWinCheck.start();
 
-const BirthdayCheck = new CronJob(everyDay, birthdayCheck(memberDB), null, true);
+const BirthdayCheck = new CronJob(
+	everyDay,
+	birthdayCheck(memberDB),
+	null,
+	true
+);
 BirthdayCheck.start();
 
 app.use("/api/v1", apiRouter);
@@ -61,16 +67,17 @@ app.post("/chatbot", async (req, res) => {
 	const message = req.body;
 	const { text, system, group_id } = message;
 	if (!text || !group_id) {
-        console.log(req);
-        return res.sendStatus(400)
+		console.log(req.body);
+		return res.sendStatus(400);
 	}
-    console.log(text);
+	console.log(`Message Recieved - [${message.sender_type}] - `, text);
 	await updateMembers({ group_id, memberDB, chatBody: req });
 	if (system && text.includes("removed") && text.includes("from the group")) {
 		await userKicked({ text, memberDB, kickDB });
 	}
-    checkForKarma(message);
-    res.sendStatus(200)
+	checkForKarma(message);
+	checkForTriggers(message);
+	res.sendStatus(200);
 });
 
 // All other GET requests not handled before will return our React app
