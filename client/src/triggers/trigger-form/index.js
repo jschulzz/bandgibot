@@ -26,7 +26,7 @@ const testImage = (url) => {
 };
 
 const SuperlativeForm = () => {
-	const [triggerText, setTriggerText] = useState(null);
+	const [triggerText, setTriggerText] = useState([""]);
 	const [message, setMessage] = useState("");
 	const [imageURL, setImageURL] = useState("");
 	const [imageError, setImageError] = useState(false);
@@ -43,7 +43,7 @@ const SuperlativeForm = () => {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					trigger: triggerText,
+					triggers: triggerText,
 					message,
 					image_url: imageURL,
 				}),
@@ -80,8 +80,8 @@ const SuperlativeForm = () => {
 	};
 
 	useEffect(() => {
-		setCanSubmit(false);
-		if (!triggerText && triggerText !== "") return;
+        setCanSubmit(false);
+		if (!triggerText.length || triggerText.every((x) => !x)) return;
 		if (imageURL && imageError) return;
 		setCanSubmit(true);
 	}, [triggerText, imageError, imageURL]);
@@ -102,19 +102,34 @@ const SuperlativeForm = () => {
 								you should probably include at least one.
 								<br />
 								<br />
+								Trigger text are case in-sensitive.
+								<br />
 							</div>
 						</article>
 						<div className="field">
-							<label className="label">Triggering text (required)</label>
+							<label className="label">Trigger text (required)</label>
 							<div className="control">
 								<input
 									type="text"
 									className="input"
-									placeholder="Triggering Text"
-									onChange={(e) => setTriggerText(e.target.value)}
+									placeholder="Trigger Text"
+									onChange={(e) =>
+										setTriggerText(
+											Array.from(
+												new Set([
+													...e.target.value
+														.split(",")
+														.map((x) => x.trim().toLowerCase()),
+												])
+											)
+										)
+									}
 								/>
 							</div>
-							<p className="help">Exact text that triggers this response</p>
+							<p className="help">
+								Text that triggers this response (case in-sensitive). To have
+								multiple trigger, separate each with a comma
+							</p>
 						</div>
 						<div className="field">
 							<label className="label">Message</label>
@@ -181,7 +196,7 @@ const SuperlativeForm = () => {
 							</div>
 							<div className="column is-9 has-text-left">
 								<span className="response-text">
-									Lorem ipsum <strong>{triggerText}</strong> dolor sit amet
+									Lorem ipsum <strong>{triggerText[0]}</strong> dolor sit amet
 								</span>
 							</div>
 							<div className="column is-2">
@@ -190,7 +205,7 @@ const SuperlativeForm = () => {
 								</span>
 							</div>
 						</div>
-						<div className="trigger-message columns is-mobile">
+						<div className="response-message columns is-mobile">
 							<div className="column is-1">
 								<span className="icon is-large">
 									<i className="fas fa-user-circle fa-lg"></i>
@@ -206,7 +221,7 @@ const SuperlativeForm = () => {
 							</div>
 						</div>
 						{imageURL && !imageError && (
-							<div className="trigger-message columns is-mobile">
+							<div className="response-message columns is-mobile">
 								<img
 									className="trigger-image column is-8 is-offset-2 image"
 									src={imageURL}

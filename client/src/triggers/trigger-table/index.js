@@ -38,7 +38,6 @@ const TriggerTable = ({ triggers }) => {
 	};
 
 	useEffect(() => {
-        console.log(triggers)
 		const sortedRecords = triggers.sort((a, b) => {
 			return a[sortField] < b[sortField] ? 1 : -1;
 		});
@@ -50,10 +49,10 @@ const TriggerTable = ({ triggers }) => {
 		<section className="section">
 			<div className="container cards-container">
 				{triggerList.map((record, idx) => (
-					<div class="card trigger-card" key={idx}>
+					<div className="card trigger-card" key={idx}>
 						{record.image_url && (
-							<div class="card-image">
-								<img class="image" src={record.image_url} alt="" />
+							<div className="card-image">
+								<img className="image" src={record.image_url} alt="" />
 							</div>
 						)}
 						<div className="card-content">
@@ -62,8 +61,12 @@ const TriggerTable = ({ triggers }) => {
 									<span className="column is-4 has-text-weight-semibold">
 										Trigger Text
 									</span>
-									<span className="column is-8 has-text-right has-text-weight-semibold">
-										{record.trigger}
+									<span className="column is-8  has-text-weight-semibold">
+										<ul>
+											{record.triggers.map((trigger) => {
+												return <li key={trigger}>{trigger}</li>;
+											})}
+										</ul>
 									</span>
 								</p>
 								<p className="columns data-row is-mobile">
@@ -94,14 +97,14 @@ const TriggerTable = ({ triggers }) => {
 								</p>
 								{auth.isAdmin && (
 									<div className="is-actions-cell">
-										<div class="buttons is-right">
+										<div className="buttons is-right">
 											<button
-												class="button is-small is-danger"
+												className="button is-small is-danger"
 												type="button"
 												onClick={() => deleteTrigger(record._id)}
 											>
-												<span class="icon">
-													<i class="fas fa-trash"></i>
+												<span className="icon">
+													<i className="fas fa-trash"></i>
 												</span>
 											</button>
 										</div>

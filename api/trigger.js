@@ -4,7 +4,7 @@ import Joi from "joi";
 import { triggersDB, memberDB } from "../datastores.js";
 
 const triggerSchema = Joi.object({
-	trigger: Joi.string().required(),
+	triggers: Joi.array().items(Joi.string()).required(),
 	message: Joi.string().allow("").optional().default(""),
 	image_url: Joi.string().allow("").optional().default(""),
 	creator: Joi.string().optional().default(""),
@@ -32,26 +32,26 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
 	// if (req.session.user_id) {
-		const allTriggers = await triggersDB.find();
-		for (const trigger of allTriggers) {
-			const [creator] = await memberDB.find({ user_id: trigger.creator });
-			trigger.creator = creator?.name || "Unknown";
-		}
-		res.json(allTriggers);
+	const allTriggers = await triggersDB.find();
+	for (const trigger of allTriggers) {
+		const [creator] = await memberDB.find({ user_id: trigger.creator });
+		trigger.creator = creator?.name || "Unknown";
+	}
+	res.json(allTriggers);
 	// } else {
 	// 	res.status(401).json({ message: "User does not have access" });
 	// }
 });
 router.get("/mine", async (req, res) => {
 	// if (req.session.user_id) {
-		const allTriggers = await triggersDB.find({
-			creator: req.session.user_id,
-		});
-		for (const trigger of allTriggers) {
-			const [creator] = await memberDB.find({ user_id: trigger.creator });
-			trigger.creator = creator?.name || "Unknown";
-		}
-		res.json(allTriggers);
+	const allTriggers = await triggersDB.find({
+		creator: req.session.user_id,
+	});
+	for (const trigger of allTriggers) {
+		const [creator] = await memberDB.find({ user_id: trigger.creator });
+		trigger.creator = creator?.name || "Unknown";
+	}
+	res.json(allTriggers);
 	// } else {
 	// 	res.status(401).json({ message: "User does not have access" });
 	// }

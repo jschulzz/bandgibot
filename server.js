@@ -12,6 +12,7 @@ import { birthdayCheck } from "./cronjobs/birthdayCheck.js";
 import { updateMembers } from "./chat-listeners/updateMembers.js";
 import { userKicked } from "./chat-listeners/userKicked.js";
 import { checkForKarma } from "./chat-listeners/karma.js";
+import { checkForTriggers } from "./chat-listeners/trigger.js";
 import apiRouter from "./api/router.js";
 
 import { fileURLToPath } from "url";
@@ -69,12 +70,13 @@ app.post("/chatbot", async (req, res) => {
 		console.log(req.body);
 		return res.sendStatus(400);
 	}
-	console.log("Message Recieved", text);
+	console.log(`Message Recieved - [${message.sender_type}] - `, text);
 	await updateMembers({ group_id, memberDB, chatBody: req });
 	if (system && text.includes("removed") && text.includes("from the group")) {
 		await userKicked({ text, memberDB, kickDB });
 	}
 	checkForKarma(message);
+	checkForTriggers(message);
 	res.sendStatus(200);
 });
 
