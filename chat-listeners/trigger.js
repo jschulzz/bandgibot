@@ -18,12 +18,7 @@ export const checkForTriggers = async (message) => {
 			if (text.toLowerCase().includes(t)) {
 				await sendMessage({
 					message,
-					attachments: [
-						{
-							type: "image",
-							url: image_url,
-						},
-					],
+                    images: [image_url]
 				});
 			}
 		});
