@@ -71,12 +71,7 @@ export const checkForKarma = async (message) => {
 			if (firstMatch && target.isUser) {
 				superlative = {
 					message: `Congratulations ${target.value}, you've reached ${karma} karma. ${firstMatch.message}`,
-					attachments: [
-						{
-							type: "image",
-							url: firstMatch.image_url,
-						},
-					],
+					images: [firstMatch.image_url],
 				};
 			} else {
 				responses.push(
@@ -88,7 +83,7 @@ export const checkForKarma = async (message) => {
 		if (superlative.message) {
 			await sendMessage({
 				message: superlative.message,
-				attachments: superlative.attachments,
+				images: superlative.images,
 			});
 		}
 	}

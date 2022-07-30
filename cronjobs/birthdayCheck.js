@@ -17,12 +17,9 @@ export const birthdayCheck = (memberDB) => {
 			const imageSet = googleImageSearchRequest.data.data;
 			const image = imageSet[Math.floor(Math.random() * imageSet.length)];
 			const message = `Happy Birthday ${nickname}!!`;
-			let attachments = [
-				{
-					type: "image",
-					url: `https://media0.giphy.com/media/${image.id}/giphy.gif`,
-				},
-			];
+			const images = [`https://media0.giphy.com/media/${image.id}/giphy.gif`];
+
+			let attachments = [];
 			if (!muted) {
 				const loci = [[15, nickname.length + 1]];
 				const user_ids = [user_id];
@@ -32,7 +29,7 @@ export const birthdayCheck = (memberDB) => {
 					loci,
 				});
 			}
-			await sendMessage({ message, attachments });
+			await sendMessage({ message, attachments, images });
 			console.log(`Happy Birthday to ${nickname}`);
 		}
 	};
